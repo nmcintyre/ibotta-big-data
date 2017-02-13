@@ -1,0 +1,179 @@
+{
+  "objects": [
+    {
+      "stage": "false",
+      "dependsOn": {
+        "ref": "ShellCommandActivityObj"
+      },
+      "scriptUri": "#{myHiveScriptUri}",
+      "name": "refresh parquet table",
+      "id": "HiveActivityId_Y9yi3",
+      "runsOn": {
+        "ref": "EmrClusterId_mEg4B"
+      },
+      "type": "HiveActivity"
+    },
+    {
+      "directoryPath": "#{myS3OutputLoc}",
+      "name": "S3OutputLocation",
+      "id": "S3OutputLocation",
+      "type": "S3DataNode"
+    },
+    {
+      "failureAndRerunMode": "CASCADE",
+      "resourceRole": "DataPipelineDefaultResourceRole",
+      "role": "DataPipelineDefaultRole",
+      "pipelineLogUri": "#{myPipelineLogUri}",
+      "scheduleType": "ONDEMAND",
+      "name": "Default",
+      "id": "Default"
+    },
+    {
+      "configuration": {
+        "ref": "EmrConfigurationId_3eHhf"
+      },
+      "name": "EMR Cluster",
+      "id": "EmrClusterId_mEg4B",
+      "releaseLabel": "emr-5.3.1",
+      "region": "us-west-2",
+      "type": "EmrCluster",
+      "terminateAfter": "1 Hour"
+    },
+    {
+      "directoryPath": "#{myS3InputLoc}",
+      "name": "S3InputLocation",
+      "id": "S3InputLocation",
+      "type": "S3DataNode"
+    },
+    {
+      "instanceType": "t1.micro",
+      "name": "EC2ResourceObj",
+      "id": "EC2ResourceObj",
+      "type": "Ec2Resource",
+      "terminateAfter": "20 Minutes"
+    },
+    {
+      "output": {
+        "ref": "S3OutputLocation"
+      },
+      "input": {
+        "ref": "S3InputLocation"
+      },
+      "stage": "true",
+      "name": "curl data file",
+      "id": "ShellCommandActivityObj",
+      "runsOn": {
+        "ref": "EC2ResourceObj"
+      },
+      "type": "ShellCommandActivity",
+      "command": "#{myShellCmd}"
+    },
+    {
+      "name": "javax.jdo.option.ConnectionURL",
+      "id": "PropertyId_yFy1H",
+      "type": "Property",
+      "value": "#{myConnectionURL}",
+      "key": "javax.jdo.option.ConnectionURL"
+    },
+    {
+      "name": "javax.jdo.option.ConnectionUserName",
+      "id": "PropertyId_VJyLM",
+      "type": "Property",
+      "value": "#{myConnectionUserName}",
+      "key": "javax.jdo.option.ConnectionUserName"
+    },
+    {
+      "name": "EMR Configuration",
+      "property": [
+        {
+          "ref": "PropertyId_yFy1H"
+        },
+        {
+          "ref": "PropertyId_ozyn3"
+        },
+        {
+          "ref": "PropertyId_VJyLM"
+        },
+        {
+          "ref": "PropertyId_xSgcj"
+        }
+      ],
+      "id": "EmrConfigurationId_3eHhf",
+      "classification": "hive-site",
+      "type": "EmrConfiguration"
+    },
+    {
+      "name": "javax.jdo.option.ConnectionPassword",
+      "id": "PropertyId_xSgcj",
+      "type": "Property",
+      "value": "#{myConnectionPassword}",
+      "key": "javax.jdo.option.ConnectionPassword"
+    },
+    {
+      "name": "javax.jdo.option.ConnectionDriverName",
+      "id": "PropertyId_ozyn3",
+      "type": "Property",
+      "value": "#{myConnectionDriverName}",
+      "key": "javax.jdo.option.ConnectionDriverName"
+    }
+  ],
+  "parameters": [
+    {
+      "description": "S3 output folder",
+      "id": "myS3OutputLoc",
+      "type": "AWS::S3::ObjectKey"
+    },
+    {
+      "description": "Hive Script URI",
+      "id": "myHiveScriptUri",
+      "type": "String"
+    },
+    {
+      "description": "Log URI",
+      "id": "myPipelineLogUri",
+      "type": "String"
+    },
+    {
+      "description": "Hive Metastore URL",
+      "id": "myConnectionURL",
+      "type": "String"
+    },
+    {
+      "description": "Hive Metastore Username",
+      "id": "myConnectionUserName",
+      "type": "String"
+    },
+    {
+      "description": "Hive Metastore Password",
+      "id": "myConnectionPassword",
+      "type": "String"
+    },
+    {
+      "description": "Hive Metastore Driver",
+      "id": "myConnectionDriverName",
+      "type": "String"
+    },
+    {
+      "default": "s3://us-east-1.elasticmapreduce.samples/pig-apache-logs/data",
+      "description": "S3 input folder",
+      "id": "myS3InputLoc",
+      "type": "AWS::S3::ObjectKey"
+    },
+    {
+      "description": "Shell command to run",
+      "id": "myShellCmd",
+      "type": "String"
+    }
+  ],
+  "values": {
+    "myShellCmd": "curl --location --insecure https://www.denvergov.org/media/gis/DataCatalog/311_service_requests/csv/311_service_requests.csv > ${OUTPUT1_STAGING_DIR}/311_service_requests.csv",
+    "myS3InputLoc": "s3://us-east-1.elasticmapreduce.samples/pig-apache-logs/data",
+    "myS3OutputLoc": "s3://nmcintyre-hive/tables/raw/service_requests",
+    "myHiveScriptUri": "s3://nmcintyre-hive/scripts/import_service_requests.sql",
+    "myPipelineLogUri": "s3://nmcintyre-logs/data-pipeline/",
+    "myConnectionURL": "jdbc:mysql:\\/\\/hive-metastore.c0s3ycns5vbu.us-west-2.rds.amazonaws.com:3306\\/hive?createDatabaseIfNotExist=true",
+    "myConnectionUserName": "awsuser",
+    "myConnectionPassword": "zEo-4mG-ntX-aJN",
+    "myConnectionDriverName": "org.mariadb.jdbc.Driver"
+  }
+}
